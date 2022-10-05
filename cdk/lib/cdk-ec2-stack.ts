@@ -3,10 +3,9 @@ import { Construct } from 'constructs';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
-
+import * as logs from 'aws-cdk-lib/aws-logs';
 
 import { readFileSync } from 'fs';
-
 export class CdkEc2Stack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
@@ -50,6 +49,11 @@ export class CdkEc2Stack extends cdk.Stack {
               actions: ['ses:SendEmail'],
               resources: [copstoneSesIdentityParam.stringValue],
             }),
+            new logs.PolicyStatement({
+              effect: iam.Effect.ALLOW,
+              actions: ['logs:CreateLogGroup', 'logs:CreateLogStream', 'logs:PutLogEvents'],
+              resources: ['*'],
+            }),
           ],
         }),
       },
@@ -78,6 +82,13 @@ export class CdkEc2Stack extends cdk.Stack {
       }),
       keyName: cfnKeyPair.keyName,
       userData: ec2.UserData.custom(userDataScript),
+    });
+
+    // CloudWatch Logs
+    const logGroup = new logs.LogGroup(this, 'proyectito-ses-ec2-log-group', {
+      logGroupName: 'proyectito-ses-ec2-log-group',
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      retention: logs.RetentionDays.ONE_WEEK,
     });
 
     // Output
