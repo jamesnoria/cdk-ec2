@@ -91,6 +91,9 @@ export class CdkEc2Stack extends cdk.Stack {
       retention: logs.RetentionDays.ONE_WEEK,
     });
 
+    console.log(('test'));
+    
+
     // Output
     new cdk.CfnOutput(this, 'ec2-instance-public-ip', {
       value: ec2Instance.instancePublicIp,
